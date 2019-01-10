@@ -47,7 +47,7 @@ def request(url, data=None, headers=None, method='GET', use_proxy=True,
 
     resp_code = r.getcode()
 
-    if resp_code >= 400 and not ignore_errors:
+    if resp_code >= 400: #and not ignore_errors:
         raise Exception(resp_code, data)
     if not (data is None) and data.__contains__('error_code'):
         raise Exception (data['error_code'], data)

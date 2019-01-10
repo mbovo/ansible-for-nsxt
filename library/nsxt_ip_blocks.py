@@ -68,7 +68,8 @@ def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(display_name=dict(required=True, type='str'),
                         cidr=dict(required=True, type='str'),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        tags=dict(required=False, type='list'),
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   ip_block_params = get_ip_block_params(module.params.copy())
