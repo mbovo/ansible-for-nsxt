@@ -130,6 +130,7 @@ def check_for_update(module, manager_url, mgr_username, mgr_password, validate_c
 def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(display_name=dict(required=True, type='str'),
+                        description=dict(required=False, type='str'),
                         logical_switch_name=dict(required=True, type='str'),
                         init_state=dict(required=False, type='str'),
                         switching_profiles=dict(required=False, type='list'),
@@ -144,7 +145,7 @@ def main():
                         allocate_addresses=dict(required=False, type='str'),
                         resource_type=dict(required=True, type='str')),
                         id=dict(required=True, type='str')),
-                        admin_state=dict(required=True, type='str'),
+                        admin_state=dict(required=False, type='str', choices=['UP', 'DOWN'], default='UP'),
                         extra_configs=dict(required=False, type='list'),
                         address_bindings=dict(required=False, type='list'),
                         tags=dict(required=False, type='list'),

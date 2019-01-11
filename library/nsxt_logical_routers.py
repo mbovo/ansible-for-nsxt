@@ -123,7 +123,7 @@ def main():
                             transport_zone_name=dict(required=False, type='str'),
                             ha_vip_configs=dict(required=False, type='list'),
                             external_transit_networks=dict(required=False, type='list')),
-                        router_type=dict(required=True, type='str'),
+                        router_type=dict(required=True, type='str', choices=["TIER0", "TIER1"]),
                         preferred_edge_cluster_member_index=dict(required=False, type='int'),
                         high_availability_mode=dict(required=False, type='str', choices=['ACTIVE_ACTIVE', 'ACTIVE_STANDBY'], default="ACTIVE_STANDBY"),
                         edge_cluster_name=dict(required=False, type='str'),
