@@ -91,6 +91,7 @@ def main():
   argument_spec.update(display_name=dict(required=True, type='str'),
                        subnets=dict(required=False, type='list'),
                        tags=dict(required=False, type='list'),
+                       description=dict(required=False, type='str'),
                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
