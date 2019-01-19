@@ -1,18 +1,11 @@
 # Ansible for NSX-T
 
 # Overview
-This repository contains NSX-T Ansible Modules, which one can use with
-Ansible to work with [VMware NSX-T Data Center][vmware-nsxt].
-
-[vmware-nsxt]: https://www.vmware.com/products/nsx.html
-
-For general information about Ansible, visit the [GitHub project page][an-github].
-
-[an-github]: https://github.com/ansible/ansible
-
-These modules are maintained by [VMware](https://www.vmware.com/).
-
+This repository contains NSX-T Ansible Modules, which one can use with Ansible to work with [VMware NSX-T Data Center][vmware-nsxt]. [vmware-nsxt]: https://www.vmware.com/products/nsx.html
+For general information about Ansible, visit the [GitHub project page][an-github]. [an-github]: https://github.com/ansible/ansible
 Documentation on the NSX platform can be found at the [NSX-T Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+
+This repository is a fork of the original one in order to give the community fast access to some features VMWare forgot or was too lazy to implement.... for examples support for NSX-T 2.3.x, tagging, router reditributions and so on. It also provide better automatic integration in the case you want to build a Kubernetes Cluster on top of NSX-T networking.
 
 ### Supported NSX Objects/Workflows
 The modules in this repository are focused on enabling automation of installation workflows of NSX-T.
@@ -90,19 +83,12 @@ ansible-playbook test_basic_topology.yml -vvv
 
 The following versions of NSX are supported:
 
- * NSX-T 2.2.*
- * Ansible 2.6
+ * NSX-T 2.3.*
+ * Ansible 2.6+
 
-# Contributing
-
-The ansible-for-nsxt project team welcomes contributions from the community. Before you start working with ansible-for-nsxt, please read our [Developer Certificate of Origin](https://cla.vmware.com/dco). All contributions to this repository must be signed as described on that page. Your signature certifies that you wrote the patch or have the right to pass it on as an open-source patch. For more detailed information, refer to [CONTRIBUTING.md](CONTRIBUTING.md).
-
-# Support
-
-The NSX-T Ansible modules in this repository are community supported. For bugs and feature requests please open a Github Issue and label it appropriately. As this is a community supported solution there is no SLA for resolutions.
 
 # License
-Copyright (c) 2018 VMware, Inc.  All rights reserved
+NSX and NSX-T are Copyright (c) 2018 VMware, Inc.  All rights reserved
 
 The NSX-T Ansible modules in this repository are available under [BSD-2 license](https://github.com/vmware/ansible-for-nsxt/blob/master/LICENSE.txt) applies to all parts of the ansible-for-nsxt.
 You may not use them except in compliance with the License.†
