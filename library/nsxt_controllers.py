@@ -101,7 +101,7 @@ def wait_till_create(vm_id, module, manager_url, mgr_username, mgr_password, val
           if any(resp['status'] in progress_status for progress_status in IN_PROGRESS_STATES):
               time.sleep(10)
           elif any(resp['status'] in progress_status for progress_status in SUCCESS_STATES):
-              time.sleep(5)
+
               return
           else:
               module.fail_json(msg= 'Error in controller status: %s'%(str(resp['status'])))
@@ -115,7 +115,7 @@ def wait_till_delete(vm_id, module, manager_url, mgr_username, mgr_password, val
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def main():
@@ -159,7 +159,7 @@ def main():
 
     for controller in resp['results']:
       wait_till_create(controller['vm_id'], module, manager_url, mgr_username, mgr_password, validate_certs)
-    time.sleep(5)
+
     module.exit_json(changed=True, body= str(resp), message="Controllers deployed.")
 
   elif state == 'absent':
@@ -175,7 +175,7 @@ def main():
       module.fail_json(msg="Failed to delete controller with id %s. Error[%s]." % (id, to_native(err)))
 
     wait_till_delete(id, module, manager_url, mgr_username, mgr_password, validate_certs)
-    time.sleep(5)
+
     module.exit_json(changed=changed, id=id, message="controller with node id %s deleted." % id)
 
 if __name__ == '__main__':

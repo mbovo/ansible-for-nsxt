@@ -110,7 +110,7 @@ def wait_till_create(vm_id, module, manager_url, mgr_username, mgr_password, val
           if any(resp['state'] in progress_status for progress_status in IN_PROGRESS_STATES):
               time.sleep(10)
           elif any(resp['state'] in progress_status for progress_status in SUCCESS_STATES):
-              time.sleep(5)
+
               return
           else:
               module.fail_json(msg= 'Error creating transport node: %s'%(str(resp['state'])))
@@ -124,7 +124,7 @@ def wait_till_delete(vm_id, module, manager_url, mgr_username, mgr_password, val
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def update_params_with_id (module, manager_url, mgr_username, mgr_password, validate_certs, transport_node_params ):
@@ -241,7 +241,7 @@ def main():
            module.fail_json(msg="Failed to add transport node. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
       wait_till_create(resp['id'], module, manager_url, mgr_username, mgr_password, validate_certs)
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport node with display name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -256,7 +256,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update transport node with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport node with node id %s updated." % id)
 
   elif state == 'absent':
@@ -273,7 +273,7 @@ def main():
         module.fail_json(msg="Failed to delete transport node with id %s. Error[%s]." % (id, to_native(err)))
 
     wait_till_delete(id, module, manager_url, mgr_username, mgr_password, validate_certs)
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Transport node with node id %s deleted." % id)
 
 

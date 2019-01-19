@@ -89,7 +89,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to add license. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, result=resp, message="license with license key %s created." % module.params['license_key'])
 
   elif state == 'absent':
@@ -103,7 +103,7 @@ def main():
     except Exception as err:
       module.fail_json(msg="Failed to delete license with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=license_key, message="license with license key %s deleted." % id)
 
 

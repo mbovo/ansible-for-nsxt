@@ -128,7 +128,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add ip pool. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="IP pool with display name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -141,7 +141,7 @@ def main():
                                 url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
       except Exception as err:
           module.fail_json(msg="Failed to update ip pool with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="ip pool with pool id %s updated." % id)
 
   elif state == 'absent':
@@ -157,7 +157,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete ip pool with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="ip pool with pool id %s deleted." % id)
 
 

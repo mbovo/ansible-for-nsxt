@@ -127,7 +127,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add transport zone. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
       #dict_resp = json.loads(resp)
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport zone with display name %s created. " % (module.params['display_name']))
     else:
       if module.check_mode:
@@ -142,7 +142,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update transport zone with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport zone with zone id %s updated." % id)
 
   elif state == 'absent':
@@ -158,7 +158,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete transport zone with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Transport zone with zone id %s deleted." % id)
 
 

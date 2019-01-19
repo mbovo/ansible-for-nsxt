@@ -103,7 +103,7 @@ def wait_till_create(id, module, manager_url, mgr_username, mgr_password, valida
             if resp["connection_status"] == "CONNECTING":
                 time.sleep(10)
             elif resp["connection_status"] == "UP":
-              time.sleep(5)
+
               return
             else:
               module.fail_json(msg= 'Error connecting to compute manager. Connection status : %s'%(str(resp["connection_status"])))
@@ -119,7 +119,7 @@ def wait_till_delete(id, module, manager_url, mgr_username, mgr_password, valida
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def check_for_update(module, manager_url, mgr_username, mgr_password, validate_certs, compute_manager_with_ids):

@@ -158,7 +158,7 @@ def wait_till_create(id, module, manager_url, mgr_username, mgr_password, valida
           if resp['host_node_deployment_status'] in DEPLOYMENT_PROGRESS:
               time.sleep(10)
           elif resp['host_node_deployment_status'] in DEPLOYMENT_SUCCESS:
-              time.sleep(5)
+
               return
           else:
               module.fail_json(msg= 'Error in fabric node status: %s'%(str(resp['host_node_deployment_status'])))
@@ -172,7 +172,7 @@ def wait_till_delete(id, module, manager_url, mgr_username, mgr_password, valida
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def main():

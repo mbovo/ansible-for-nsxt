@@ -105,7 +105,7 @@ def wait_till_delete(id, module, manager_url, mgr_username, mgr_password, valida
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 def get_compute_collecting_id (module, manager_url, mgr_username, mgr_password, validate_certs, manager_name, cluster_name):
     try:
