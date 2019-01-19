@@ -13,6 +13,9 @@
 import json
 from ansible.module_utils.urls import open_url, fetch_url
 from ansible.module_utils.six.moves.urllib.error import HTTPError
+from ansible.module_utils._text import to_native
+
+
 def vmware_argument_spec():
     return dict(
         hostname=dict(type='str', required=True),
@@ -21,6 +24,7 @@ def vmware_argument_spec():
         port=dict(type='int', default=443),
         validate_certs=dict(type='bool', requried=False, default=True),
     )
+
 
 def request(url, data=None, headers=None, method='GET', use_proxy=True,
             force=False, last_mod_time=None, timeout=300, validate_certs=True,
@@ -53,3 +57,35 @@ def request(url, data=None, headers=None, method='GET', use_proxy=True,
         raise Exception (data['error_code'], data)
     else:
         return resp_code, data
+
+
+def get_params(args={}, args_to_remove=[]):
+    for key in args_to_remove:
+        args.pop(key, None)
+    for key, value in args.copy().items():
+        if value is None:
+            args.pop(key, None)
+    return args
+
+
+def api_call(module, api_path, method='GET', data=None, headers={}):
+
+    hostname, username, password, validate_certs = module.params['hostname'], \
+                                                   module.params['username'], \
+                                                   module.params['password'], \
+                                                   module.params['validate_certs']
+    manager_url = 'https://{}/api/v1'.format(hostname)
+    headers['Accept'] = 'application/json'
+    if method != 'GET':
+        headers['Content-Type'] = 'application/json'
+    try:
+        (rc, resp) = request(manager_url + api_path, headers=headers,
+                             method=method,
+                             data=data,
+                             url_username=username,
+                             url_password=password,
+                             validate_certs=validate_certs,
+                             ignore_errors=True)
+    except Exception as err:
+        module.fail_json(msg='Error accessing %s Error [%s]' % (api_path, to_native(err)))
+    return rc, resp
