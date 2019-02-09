@@ -11,6 +11,9 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import absolute_import, division, print_function
+
+import pprint
+
 __metaclass__ = type
 
 
@@ -110,7 +113,7 @@ def wait_till_create(vm_id, module, manager_url, mgr_username, mgr_password, val
           if any(resp['state'] in progress_status for progress_status in IN_PROGRESS_STATES):
               time.sleep(10)
           elif any(resp['state'] in progress_status for progress_status in SUCCESS_STATES):
-              time.sleep(5)
+
               return
           else:
               module.fail_json(msg= 'Error creating transport node: %s'%(str(resp['state'])))
@@ -124,7 +127,7 @@ def wait_till_delete(vm_id, module, manager_url, mgr_username, mgr_password, val
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def update_params_with_id (module, manager_url, mgr_username, mgr_password, validate_certs, transport_node_params ):
@@ -200,7 +203,7 @@ def main():
                         fabric_node_name=dict(required=True, type='str'),
                         host_switches=dict(required=False, type='list'),
                         transport_zone_endpoints=dict(required=False, type='list'),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   transport_node_params = get_transport_node_params(module.params.copy())
@@ -227,7 +230,7 @@ def main():
     if not updated:
       # add the node
       if module.check_mode:
-          module.exit_json(changed=True, debug_out=str(json.dumps(logical_switch_params)), id='12345')
+          module.exit_json(changed=True, debug_out=str(json.dumps(body)), id='12345')
       request_data = json.dumps(body)
       try:
           if not transport_node_id:
@@ -241,7 +244,7 @@ def main():
            module.fail_json(msg="Failed to add transport node. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
       wait_till_create(resp['id'], module, manager_url, mgr_username, mgr_password, validate_certs)
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport node with display name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -256,7 +259,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update transport node with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Transport node with node id %s updated." % id)
 
   elif state == 'absent':
@@ -273,7 +276,7 @@ def main():
         module.fail_json(msg="Failed to delete transport node with id %s. Error[%s]." % (id, to_native(err)))
 
     wait_till_delete(id, module, manager_url, mgr_username, mgr_password, validate_certs)
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Transport node with node id %s deleted." % id)
 
 

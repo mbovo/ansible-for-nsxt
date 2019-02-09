@@ -88,11 +88,14 @@ def get_lr_static_route_from_network(module, manager_url, mgr_username, mgr_pass
 
 def main():
   argument_spec = vmware_argument_spec()
-  argument_spec.update(next_hops=dict(required=True, type='list'),
-                logical_router_id=dict(required=False, type='str'),
-                network=dict(required=True, type='str'),
-                id=dict(required=False, type= 'str'),
-                state=dict(reauired=True, choices=['present', 'absent']))
+  argument_spec.update(display_name=dict(required=True, type='str'),
+                       next_hops=dict(required=True, type='list'),
+                       description=dict(required=True, type='str'),
+                       logical_router_id=dict(required=True, type='str'),
+                       network=dict(required=True, type='str'),
+                       id=dict(required=False, type='str'),
+                       tags=dict(required=False, type='list'),
+                       state=dict(required=True, choices=['present', 'absent']))
 
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
@@ -134,7 +137,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add logical router port. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Logical router static route  with network %s created." % module.params['network'])
     else:
       if module.check_mode:
@@ -148,7 +151,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update logical router static route with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="logical router static route  with id %s updated." % id)
 
   elif state == 'absent':
@@ -162,7 +165,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete logical static route with id %s. Error[%s]." % (logical_router_static_route_id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=logical_router_static_route_id, message="Logical router static route with id %s deleted." % logical_router_static_route_id)
 
 

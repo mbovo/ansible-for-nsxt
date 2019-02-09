@@ -11,6 +11,8 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import absolute_import, division, print_function
+
+
 __metaclass__ = type
 
 
@@ -110,11 +112,14 @@ RETURN = '''# '''
 
 import json, time
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.vmware import vmware_argument_spec, request
+from ansible.module_utils.vmware import vmware_argument_spec, request, find_morefId, find_moref_ids_for_deployment
 from ansible.module_utils._text import to_native
 
+
+
 def get_fabric_params(args=None):
-    args_to_remove = ['state', 'username', 'password', 'port', 'hostname', 'validate_certs']
+    args_to_remove = ['state', 'username', 'password', 'port', 'hostname', 'validate_certs','vc_host','vc_username',
+                      'vc_password', 'vc_datacenter']
     for key in args_to_remove:
         args.pop(key, None)
     for key, value in args.copy().items():
@@ -158,7 +163,7 @@ def wait_till_create(id, module, manager_url, mgr_username, mgr_password, valida
           if resp['host_node_deployment_status'] in DEPLOYMENT_PROGRESS:
               time.sleep(10)
           elif resp['host_node_deployment_status'] in DEPLOYMENT_SUCCESS:
-              time.sleep(5)
+
               return
           else:
               module.fail_json(msg= 'Error in fabric node status: %s'%(str(resp['host_node_deployment_status'])))
@@ -172,7 +177,7 @@ def wait_till_delete(id, module, manager_url, mgr_username, mgr_password, valida
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 
 def main():
@@ -186,6 +191,10 @@ def main():
                         username=dict(required=False, type='str'),
                         password=dict(required=False, type='str', no_log=True),
                         thumbprint=dict(required=False, type='str', no_log=True)),
+                    vc_host=dict(required=True,type='str'),
+                    vc_username=dict(required=True, type='str'),
+                    vc_password=dict(required=True, type='str',no_log=True),
+                    vc_datacenter=dict(required=True, type='str'),
                     deployment_config=dict(required=False, type='dict',
                         node_user_settings=dict(required=True, type='dict',
                             cli_username=dict(required=False, type='str'),
@@ -213,12 +222,22 @@ def main():
                     ip_addresses=dict(required=False, type='list'),
                     external_id=dict(required=False, type='str'),
                     resource_type=dict(required=True, type='str', choices=['HostNode', 'EdgeNode']),
-                    state=dict(reauired=True, choices=['present', 'absent']))
+                    state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True,
                          required_if=[['resource_type', 'HostNode', ['os_type']],
                                       ['resource_type', 'EdgeNode', ['deployment_config']]])
   fabric_params = get_fabric_params(module.params.copy())
+
+  if fabric_params['resource_type'] == "EdgeNode":
+      vm_params = find_moref_ids_for_deployment(
+          fabric_params['deployment_config']['vm_deployment_config'], module.params['vc_host'], module.params['vc_username'],
+          module.params['vc_password'], module.params['vc_datacenter'])
+
+      # Name to id mapping
+      for key in vm_params.keys():
+          fabric_params['deployment_config']['vm_deployment_config'][key] = vm_params[key]
+
   state = module.params['state']
   mgr_hostname = module.params['hostname']
   mgr_username = module.params['username']

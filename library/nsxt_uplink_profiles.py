@@ -87,7 +87,7 @@ def main():
                         named_teamings=dict(required=False, type='list'),
                         lags=dict(required=False, type='list'),
                         resource_type=dict(required=True, type='str', choices=['UplinkHostSwitchProfile']),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   profile_params = get_profile_params(module.params.copy())
@@ -124,7 +124,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add host profile. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="host profile with display name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -139,7 +139,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update host profile with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="host profile with id %s updated." % id)
 
   elif state == 'absent':
@@ -155,7 +155,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete host profile with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="host profile with id %s deleted." % id)
 
 

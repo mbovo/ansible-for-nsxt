@@ -61,7 +61,7 @@ def check_license_exist(module, manager_url, mgr_username, mgr_password, validat
 def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(license_key=dict(required=True, type='str', no_log=True),
-                    state=dict(reauired=True, choices=['present', 'absent']))
+                    state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   license_params = get_license_params(module.params.copy())
@@ -89,7 +89,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to add license. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, result=resp, message="license with license key %s created." % module.params['license_key'])
 
   elif state == 'absent':
@@ -103,7 +103,7 @@ def main():
     except Exception as err:
       module.fail_json(msg="Failed to delete license with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=license_key, message="license with license key %s deleted." % id)
 
 

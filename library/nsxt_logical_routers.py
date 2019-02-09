@@ -123,12 +123,13 @@ def main():
                             transport_zone_name=dict(required=False, type='str'),
                             ha_vip_configs=dict(required=False, type='list'),
                             external_transit_networks=dict(required=False, type='list')),
-                        router_type=dict(required=True, type='str'),
+                        router_type=dict(required=True, type='str', choices=["TIER0", "TIER1"]),
                         preferred_edge_cluster_member_index=dict(required=False, type='int'),
-                        high_availability_mode=dict(required=False, type='str'),
+                        high_availability_mode=dict(required=False, type='str', choices=['ACTIVE_ACTIVE', 'ACTIVE_STANDBY'], default="ACTIVE_STANDBY"),
                         edge_cluster_name=dict(required=False, type='str'),
-                        resource_type=dict(required=False, type='str', choices=['LogicalRouter']),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        resource_type=dict(required=False, type='str', choices=['LogicalRouter'], default='LogicalRouter'),
+                        state=dict(required=True, choices=['present', 'absent']),
+                        tags=dict(required=False, type='list'))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   logical_router_params = get_logical_router_params(module.params.copy())
@@ -161,13 +162,13 @@ def main():
           if logical_router_id:
               module.exit_json(changed=False, id=logical_router_id, message="Logical router with display_name %s already exist."% module.params['display_name'])
 
-          (rc, resp) = request(manager_url+ '/logical-routers', data=request_data, headers=headers, method='POST',
+          (rc, resp) = request(manager_url+'/logical-routers', data=request_data, headers=headers, method='POST',
                                 url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
       except Exception as err:
           module.fail_json(msg="Failed to add logical router. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
-      module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Logical router with display_name %s created." % module.params['display_name'])
+
+      module.exit_json(changed=True, id=resp["id"], body=str(resp), message="Logical router with display_name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
           module.exit_json(changed=True, debug_out=str(json.dumps(body)), id=logical_router_id)
@@ -181,8 +182,8 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update logical router with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
-      module.exit_json(changed=True, id=resp["id"], body= str(resp), message="logical router with id %s updated." % id)
+
+      module.exit_json(changed=True, id=resp["id"], body=str(resp), message="logical router with id %s updated." % id)
 
   elif state == 'absent':
     # delete the array
@@ -197,7 +198,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete logical router with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="logical router with id %s deleted." % id)
 
 

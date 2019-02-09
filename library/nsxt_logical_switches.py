@@ -124,7 +124,8 @@ def check_for_update(module, manager_url, mgr_username, mgr_password, validate_c
 def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(display_name=dict(required=True, type='str'),
-                        replication_mode=dict(required=False, type='str'),
+                        description=dict(required=False, type='str'),
+                        replication_mode=dict(required=False, type='str', choices=['MTEP', 'SOURCE']),
                         extra_configs=dict(required=False, type='list'),
                         uplink_teaming_policy_name=dict(required=False, type='str'),
                         transport_zone_name=dict(required=True, type='str'),
@@ -134,11 +135,12 @@ def main():
                         vni=dict(required=False, type='int'),
                         vlan_trunk_spec=dict(required=False, type='dict',
                         vlan_ranges=dict(required=True, type='list')),
-                        admin_state=dict(required=True, type='str'),
+                        admin_state=dict(required=False, type='str', choices=['UP', 'DOWN'], default='UP'),
                         address_bindings=dict(required=False, type='list'),
                         switching_profiles=dict(required=False, type='list'),
                         lswitch_id=dict(required=False, type='str'),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        tags=dict(required=False, type='list'),
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   logical_switch_params = get_logical_switch_params(module.params.copy())
@@ -177,7 +179,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add logical switch. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Logical switch with display name %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -192,7 +194,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update logical switch with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="logical switch with lswitch id %s updated." % id)
 
   elif state == 'absent':
@@ -208,7 +210,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete logical switch with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Logical switch with zone id %s deleted." % id)
 
 

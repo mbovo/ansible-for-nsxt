@@ -130,6 +130,7 @@ def check_for_update(module, manager_url, mgr_username, mgr_password, validate_c
 def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(display_name=dict(required=True, type='str'),
+                        description=dict(required=False, type='str'),
                         logical_switch_name=dict(required=True, type='str'),
                         init_state=dict(required=False, type='str'),
                         switching_profiles=dict(required=False, type='list'),
@@ -144,10 +145,11 @@ def main():
                         allocate_addresses=dict(required=False, type='str'),
                         resource_type=dict(required=True, type='str')),
                         id=dict(required=True, type='str')),
-                        admin_state=dict(required=True, type='str'),
+                        admin_state=dict(required=False, type='str', choices=['UP', 'DOWN'], default='UP'),
                         extra_configs=dict(required=False, type='list'),
                         address_bindings=dict(required=False, type='list'),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        tags=dict(required=False, type='list'),
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
   logical_port_params = get_logical_port_params(module.params.copy())
@@ -185,7 +187,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add logical port. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Logical port with displayname %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -199,7 +201,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update logical port with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="logical port with id %s updated." % id)
 
   elif state == 'absent':
@@ -215,7 +217,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete logical port with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Logical port with id %s deleted." % id)
 
 

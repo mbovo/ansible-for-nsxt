@@ -105,7 +105,7 @@ def wait_till_delete(id, module, manager_url, mgr_username, mgr_password, valida
                         url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
           time.sleep(10)
     except Exception as err:
-      time.sleep(5)
+
       return
 def get_compute_collecting_id (module, manager_url, mgr_username, mgr_password, validate_certs, manager_name, cluster_name):
     try:
@@ -180,7 +180,7 @@ def main():
                     value=dict(required=True, type='str'),
                     key=dict(required=False, type='str')),
                     compute_collections=dict(required=False, type='list'),
-                    state=dict(reauired=True, choices=['present', 'absent']))
+                    state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True,
                          required_if=[['state', 'present', ['compute_collections']]])

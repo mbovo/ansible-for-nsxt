@@ -46,14 +46,16 @@ from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.vmware import vmware_argument_spec, request
 from ansible.module_utils._text import to_native
 
+
 def get_logical_router_port_params(args=None):
-    args_to_remove = ['state', 'username', 'password', 'port', 'hostname', 'validate_certs']
+    args_to_remove = ['state', 'username', 'password', 'port', 'hostname', 'validate_certs', 'logical_router_name']
     for key in args_to_remove:
         args.pop(key, None)
     for key, value in args.copy().items():
         if value == None:
             args.pop(key, None)
     return args
+
 
 def get_logical_router_ports(module, manager_url, mgr_username, mgr_password, validate_certs):
     try:
@@ -62,6 +64,7 @@ def get_logical_router_ports(module, manager_url, mgr_username, mgr_password, va
     except Exception as err:
       module.fail_json(msg='Error accessing logical router ports. Error [%s]' % (to_native(err)))
     return resp
+
 
 def get_lr_port_from_display_name(module, manager_url, mgr_username, mgr_password, validate_certs, display_name):
     logical_router_ports = get_logical_router_ports(module, manager_url, mgr_username, mgr_password, validate_certs)
@@ -78,6 +81,20 @@ def get_lr_port_from_display_name(module, manager_url, mgr_username, mgr_passwor
 #     else:
 #         return obj
 
+
+def get_lr_id_from_display_name(module, manager_url, mgr_username, mgr_password, validate_certs, endpoint, display_name):
+    try:
+      (rc, resp) = request(manager_url+ endpoint, headers=dict(Accept='application/json'),
+                      url_username=mgr_username, url_password=mgr_password, validate_certs=validate_certs, ignore_errors=True)
+    except Exception as err:
+      return None
+
+    for result in resp['results']:
+        if result.__contains__('display_name') and result['display_name'] == display_name:
+            return result['id']
+    return None
+
+
 def check_for_update(module, manager_url, mgr_username, mgr_password, validate_certs, logical_router_port_params):
     existing_lr_port = get_lr_port_from_display_name(module, manager_url, mgr_username, mgr_password, validate_certs, logical_router_port_params['display_name'])
     if existing_lr_port is None:
@@ -91,14 +108,16 @@ def check_for_update(module, manager_url, mgr_username, mgr_password, validate_c
         return True
     return False
 
+
 def main():
   argument_spec = vmware_argument_spec()
   argument_spec.update(display_name=dict(required=True, type='str'),
+                        description=dict(required=False, type='str'),
                         subnets=dict(required=False, type='list'),
                         urpf_mode=dict(required=False, type='str'),
                         mac_address=dict(required=False, type='str'),
                         linked_logical_switch_port_id=dict(required=False, type='dict',
-                        selected=dict(required=True, type='boolean'),
+                        selected=dict(required=False, type='boolean'),
                         service=dict(required=False, type='dict',
                         ether_type=dict(required=True, type='int'),
                         destination_ports=dict(required=False, type='list'),
@@ -136,13 +155,19 @@ def main():
                         is_valid=dict(required=False, type='boolean'),
                         target_id=dict(required=False, type='str'),
                         target_type=dict(required=False, type='str')),
-                        logical_router_id=dict(required=True, type='str'),
+                        logical_router_id=dict(required=False, type='str'),
+                        logical_router_name=dict(required=False, type='str'),
                         service_bindings=dict(required=False, type='list'),
-                        resource_type=dict(required=True, type='str'),
-                        state=dict(reauired=True, choices=['present', 'absent']))
+                        resource_type=dict(required=True, type='str',
+                                           choices=['LogicalRouterCentralizedServicePort',
+                                                    'LogicalRouterDownLinkPort',
+                                                    'LogicalRouterLinkPortOnTIER0',
+                                                    'LogicalRouterLinkPortOnTIER1',
+                                                    'LogicalRouterLoopbackPort',
+                                                    'LogicalRouterUpLinkPort']),
+                        state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
-  logical_router_port_params = get_logical_router_port_params(module.params.copy())
   state = module.params['state']
   mgr_hostname = module.params['hostname']
   mgr_username = module.params['username']
@@ -151,7 +176,14 @@ def main():
   display_name = module.params['display_name']
   manager_url = 'https://{}/api/v1'.format(mgr_hostname)
 
-  logical_router_port_dict = get_lr_port_from_display_name (module, manager_url, mgr_username, mgr_password, validate_certs, display_name)
+  lr_id = get_lr_id_from_display_name(module, manager_url, mgr_username, mgr_password, validate_certs, '/logical-routers', module.params['logical_router_name'])
+  if lr_id:
+      module.params['logical_router_id'] = lr_id
+
+  logical_router_port_params = get_logical_router_port_params(module.params.copy())
+
+
+  logical_router_port_dict = get_lr_port_from_display_name(module, manager_url, mgr_username, mgr_password, validate_certs, display_name)
   logical_router_port_id, revision = None, None
   if logical_router_port_dict:
     logical_router_port_id = logical_router_port_dict['id']
@@ -176,7 +208,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to add logical router port. Request body [%s]. Error[%s]." % (request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="Logical router port with displayname %s created." % module.params['display_name'])
     else:
       if module.check_mode:
@@ -190,7 +222,7 @@ def main():
       except Exception as err:
           module.fail_json(msg="Failed to update logical router port with id %s. Request body [%s]. Error[%s]." % (id, request_data, to_native(err)))
 
-      time.sleep(5)
+
       module.exit_json(changed=True, id=resp["id"], body= str(resp), message="logical router port with id %s updated." % id)
 
   elif state == 'absent':
@@ -206,7 +238,7 @@ def main():
     except Exception as err:
         module.fail_json(msg="Failed to delete logical router port with id %s. Error[%s]." % (id, to_native(err)))
 
-    time.sleep(5)
+
     module.exit_json(changed=True, object_name=id, message="Logical router port with id %s deleted." % id)
 
 
