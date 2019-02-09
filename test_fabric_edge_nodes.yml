@@ -9,6 +9,10 @@
         hostname: "{{hostname}}"
         username: "{{username}}"
         password: "{{password}}"
+	vc_host: {{vc_hostname}}"
+	vc_username: "{{vc_username}}"
+	vc_password: "{{vc_password}}"
+	vc_datacenter: "datacenter-name"
         validate_certs: False
         resource_type: "EdgeNode"
         display_name: "EdegeNode1"
@@ -24,13 +28,13 @@
             placement_type: VsphereDeploymentConfig
             vc_id: "1de65058-fa28-42fa-8f69-a1bb7b4516fa"
             data_network_ids:
-            - network-16
-            - network-16
-            - network-16
-            management_network_id: "network-16"
+            - network-name1
+            - network-name2
+            - network-name3
+            management_network_id: "network-name-management"
             hostname: "EdgeVM1"
-            compute_id: "domain-c8"
-            storage_id: "datastore-12"
+            compute_id: "cluster-name"
+            storage_id: "datastore-name"
             default_gateway_addresses:
             - 10.112.203.253
             management_port_subnets:

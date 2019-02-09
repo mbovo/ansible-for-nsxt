@@ -11,6 +11,9 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from __future__ import absolute_import, division, print_function
+
+import pprint
+
 __metaclass__ = type
 
 
@@ -227,7 +230,7 @@ def main():
     if not updated:
       # add the node
       if module.check_mode:
-          module.exit_json(changed=True, debug_out=str(json.dumps(logical_switch_params)), id='12345')
+          module.exit_json(changed=True, debug_out=str(json.dumps(body)), id='12345')
       request_data = json.dumps(body)
       try:
           if not transport_node_id:

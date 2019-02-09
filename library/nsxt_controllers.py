@@ -36,6 +36,7 @@ EXAMPLES = '''
         cli_password: "Admin!23Admin"
         root_password: "Admin!23Admin"
       deployment_config:
+
         placement_type: VsphereClusterNodeVMDeploymentConfig
         vc_id: "67dbce0d-973e-4b7d-813d-7ae5a91754c2"
         management_network_id: "network-44"
@@ -59,8 +60,9 @@ RETURN = '''# '''
 
 import json, time
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.vmware import vmware_argument_spec, request
+from ansible.module_utils.vmware import vmware_argument_spec, request, find_morefId, find_moref_ids_for_deployment
 from ansible.module_utils._text import to_native
+import pprint
 
 FAILED_STATES = ["UNKNOWN_STATE", "VM_DEPLOYMENT_FAILED", "VM_POWER_ON_FAILED", "VM_ONLINE_FAILED", "VM_CLUSTERING_FAILED",
                       "VM_DECLUSTER_FAILED", "VM_POWER_OFF_FAILED", "VM_UNDEPLOY_FAILED"]
@@ -68,6 +70,8 @@ IN_PROGRESS_STATES = ["VM_DEPLOYMENT_QUEUED", "VM_DEPLOYMENT_IN_PROGRESS", "VM_P
                       "VM_WAITING_TO_COME_ONLINE", "VM_CLUSTERING_IN_PROGRESS", "WAITING_TO_UNDEPLOY_VM", "VM_DECLUSTER_IN_PROGRESS",
                       "VM_POWER_OFF_IN_PROGRESS", "VM_UNDEPLOY_IN_PROGRESS", "VM_UNDEPLOY_SUCCESSFUL"]
 SUCCESS_STATES = ["VM_CLUSTERING_SUCCESSFUL", "VM_DECLUSTER_SUCCESSFUL"]
+
+
 def get_controller_node_params(args=None):
     args_to_remove = ['state', 'username', 'password', 'port', 'hostname', 'validate_certs', 'node_id']
     for key in args_to_remove:
@@ -126,6 +130,10 @@ def main():
                     shared_secret=dict(required=False, type='str'),
                     clustering_type=dict(required=True, type='str')),
                     node_id=dict(required=False, type='str'),
+                    vc_host=dict(required=True,type='str'),
+                    vc_username=dict(required=True,type='str'),
+                    vc_password=dict(required=True,type='str'),
+                    vc_datacenter=dict(required=True,type='str'),
                     state=dict(required=True, choices=['present', 'absent']))
 
   module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True,
@@ -144,6 +152,11 @@ def main():
   request_data = json.dumps(node_params)
   if state == 'present':
     # add controller
+    vm_params = find_moref_ids_for_deployment(node_params['deployment_requests'][0]['deployment_config'],
+      module.params['vc_host'], module.params['vc_username'], module.params['vc_password'], module.params['vc_datacenter'])
+    for key in vm_params.keys():
+        node_params['deployment_requests'][0]['deployment_config'][key] = vm_params[key]
+
     results = get_controllers(module, manager_url, mgr_username, mgr_password, validate_certs)
     is_controller_node_exist, hostname = check_controller_node_exist(results, module)
     if is_controller_node_exist:
